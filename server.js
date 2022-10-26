@@ -34,7 +34,28 @@ const GameType = new GraphQLObjectType({
     fields: () => ({
         id: { type: new GraphQLNonNull(GraphQLInt) },
         name: { type: new GraphQLNonNull(GraphQLString) },
-        publisherId: { type: new GraphQLNonNull(GraphQLInt) }
+        publisherId: { type: new GraphQLNonNull(GraphQLInt) },
+        publisher: { 
+            type : PublisherType,
+            resolve: (game) => {
+                return publishers.find(publisher => publisher.id == game.publisherId)
+            }
+        }
+    })
+})
+
+const PublisherType = new GraphQLObjectType({
+    name: 'Publisher',
+    description: 'This represents a videogame publisher',
+    fields: () => ({
+        id: { type: new GraphQLNonNull(GraphQLInt) },
+        name: { type: new GraphQLNonNull(GraphQLString) },
+        games: {
+            type: new GraphQLList(GameType),
+            resolve: (publisher) => {
+                return games.filter(game => game.publisherId == publisher.id)
+            }
+        }
     })
 })
 
@@ -46,6 +67,11 @@ const RootQueryType = new GraphQLObjectType({
             type: new GraphQLList(GameType),
             description: 'List of published games',
             resolve: () => games
+        },
+        publishers: {
+            type: new GraphQLList(PublisherType),
+            description: 'List of game publishers',
+            resolve: () => publishers
         }
     })
 })
