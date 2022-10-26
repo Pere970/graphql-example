@@ -92,8 +92,45 @@ const RootQueryType = new GraphQLObjectType({
     })
 })
 
+const RootMutationType = new GraphQLObjectType({
+    name: 'Mutation',
+    description: 'Root Mutation',
+    fields: () => ({
+        addGame: {
+            type: GameType,
+            description: 'Add a new published game',
+            args : {
+                name : { type: GraphQLNonNull(GraphQLString)},
+                publisherId : { type: GraphQLNonNull(GraphQLInt)}
+            },
+            resolve: (parent, args) => {
+                const game = { 
+                    id: games.length + 1,
+                    name: args.name,
+                    publisherId: args.publisherId
+                }
+                games.push(game)
+                return game
+            }
+        },
+        addPublisher: {
+            type: PublisherType,
+            description: 'Add an game publisher',
+            args: {
+              name: { type: GraphQLNonNull(GraphQLString) }
+            },
+            resolve: (parent, args) => {
+              const publisher = { id: publishers.length + 1, name: args.name }
+              publishers.push(publisher)
+              return publisher
+            }
+          }
+    })
+})
+
 const schema = new GraphQLSchema ({
-    query: RootQueryType
+    query: RootQueryType,
+    mutation: RootMutationType
 })
 
 const app = express()
