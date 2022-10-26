@@ -4,7 +4,10 @@ const { graphqlHTTP } = require('express-graphql');
 const { 
     GraphQLSchema,
     GraphQLObjectType,
-    GraphQLString
+    GraphQLString,
+    GraphQLList,
+    GraphQLInt,
+    GraphQLNonNull
 } = require('graphql');
 
 const publishers = [
@@ -25,16 +28,30 @@ const games = [
     { id: 8, name: 'Microsoft Flight Simulator', publisherId: 4}
 ]
 
-const schema = new GraphQLSchema ({
-    query: new GraphQLObjectType({
-        name: 'HelloWorld',
-        fields: () => ({
-            message: {
-                type: GraphQLString,
-                resolve: () => 'Hello World'
-            }
-        })
+const GameType = new GraphQLObjectType({
+    name: 'Game',
+    description: 'This represents a videogame',
+    fields: () => ({
+        id: { type: new GraphQLNonNull(GraphQLInt) },
+        name: { type: new GraphQLNonNull(GraphQLString) },
+        publisherId: { type: new GraphQLNonNull(GraphQLInt) }
     })
+})
+
+const RootQueryType = new GraphQLObjectType({
+    name: 'Query',
+    description: 'Root Query',
+    fields: () => ({
+        games: {
+            type: new GraphQLList(GameType),
+            description: 'List of published games',
+            resolve: () => games
+        }
+    })
+})
+
+const schema = new GraphQLSchema ({
+    query: RootQueryType
 })
 
 const app = express()
